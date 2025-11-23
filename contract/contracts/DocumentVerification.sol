@@ -17,9 +17,10 @@ contract DocumentVerification {
         emit DocumentStored(docHash, msg.sender, block.timestamp);
     }
 
-    function verifyDocument(bytes32 docHash) external view returns (bool, address, uint256) {
-        Document memory doc = documents[docHash];
-        if (doc.timestamp == 0) return (false, address(0), 0);
-        return (true, doc.uploader, doc.timestamp);
-    }
+   function verifyDocument(bytes32 fileHash) public view returns (bool, address, uint256) {
+    if(documents[fileHash].uploader == address(0)) return (false, address(0), 0);
+    Document memory doc = documents[fileHash];
+    return (true, doc.uploader, doc.timestamp);
+}
+
 }
