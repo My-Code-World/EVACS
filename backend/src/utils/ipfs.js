@@ -1,10 +1,26 @@
-const { Web3Storage } = require('web3.storage');
+const axios = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
+require('dotenv').config();
 
-const client = new Web3Storage({ token: process.env.WEB3_STORAGE_API_KEY });
+const PINATA_API_KEY = process.env.PINATA_API_KEY;
+const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY;
 
-async function uploadToIPFS(file) {
-    const cid = await client.put([file]);
-    return cid;
+async function uploadToIPFS(filePath) {
+    const data = new FormData();
+    data.append('file', fs.createReadStream(filePath));
+
+    const res = await axios.post('https://api.pinata.cloud/pinning/pinFileToIPFS', data, {
+        maxBodyLength: 'Infinity',
+        headers: {
+            'Content-Type': `multipart/form-data; boundary=${data._boundary}`,
+            pinata_api_key: PINATA_API_KEY,
+            pinata_secret_api_key: PINATA_SECRET_API_KEY,
+        },
+    });
+
+    // returns the IPFS hash (CID)
+    return res.data.IpfsHash;
 }
 
 module.exports = { uploadToIPFS };
